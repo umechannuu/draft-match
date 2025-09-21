@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>チーム候補生成結果</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --card-hover: #f1f5f9;
+            --muted: #64748b;
+            --text: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --ok: #059669;
+            --warn: #d97706;
+            --err: #dc2626;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--muted);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem 3rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--card-hover);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn.ghost {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--muted);
+        }
+
+        .btn.ghost:hover:not(:disabled) {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .btn.danger {
+            background: var(--err);
+            border-color: var(--err);
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        h3 {
+            margin: 0 0 0.75rem 0;
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 0.75rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--card-hover);
+            border-radius: 0.5rem;
+        }
+
+        .info-label {
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--text);
+        }
+
+        .team-container {
+            margin-top: 2rem;
+        }
+
+        .team-card {
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--card);
+            box-shadow: var(--shadow);
+        }
+
+        .team-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .team-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .member-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--card-hover);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .role-pill {
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .member-name {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 0 0.75rem 2rem;
+                margin: 1rem auto;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .team-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .member-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>チーム候補生成結果</h1>
+            <p class="subtitle">ドラフトマッチによる提案</p>
+        </div>
+    </header>
+    <main>
+        <section class="card">
+            <div class="action-bar">
+                <div class="muted">他のプロジェクトのチーム編成を行う場合は「戻る」をクリックしてください</div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn ghost" onclick="history.back()">← 戻る</button>
+                    <button class="btn danger" id="clearBtn">クリア</button>
+                </div>
+            </div>
+
+            <div id="content"></div>
+            <div id="empty" class="empty-state" style="display:none;">
+                <div class="empty-icon">📋</div>
+                <h3>表示できるデータが見つかりません</h3>
+                <p>送信ページから「APIに送信」を実行すると自動でここに遷移します。</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // sessionStorage から結果を取得
+        const RAW = sessionStorage.getItem('api_result');
+        const content = document.getElementById('content');
+        const empty = document.getElementById('empty');
+
+        function render(data) {
+            // project_id は除外
+            const { project_id, project_name, upstream } = data || {};
+            if (!project_name && !upstream) { 
+                empty.style.display = 'block'; 
+                return; 
+            }
+
+            // 概要ブロック
+            const wrap = document.createElement('div');
+            wrap.innerHTML = `
+                <h2>プロジェクト概要</h2>
+                <div class="info-grid">
+                    <div class="info-label">プロジェクト名</div>
+                    <div class="info-value">${project_name ?? '-'}</div>
+                </div>
+            `;
+
+            // upstream.set1, set2, set3
+            const sets = [];
+            if (upstream?.set1) sets.push({ name: '高スコアチーム', members: upstream.set1, description: 'スキルスコアが高いメンバーで構成されたチーム' });
+            if (upstream?.set2) sets.push({ name: '多様性考慮チーム', members: upstream.set2, description: '多様なスキルセットを持つメンバーで構成されたチーム' });
+            if (upstream?.set3) sets.push({ name: '機会創出チーム', members: upstream.set3, description: '新しい機会とスキル向上を重視したチーム' });
+
+            const setsBox = document.createElement('div');
+            setsBox.className = 'team-container';
+            setsBox.innerHTML = `<h2>チーム編成候補</h2>`;
+            
+            sets.forEach((s, i) => {
+                const card = document.createElement('div');
+                card.className = 'team-card';
+                const members = Array.isArray(s.members) ? s.members : [];
+                
+                const memberList = members.map(m => `
+                    <div class="member-item">
+                        <div class="role-pill">${m.role || '-'}</div>
+                        <div class="member-name">${m.employee_name ?? m.employee_id ?? '-'}</div>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="team-header">
+                        <div class="team-badge">チーム ${i + 1}</div>
+                        <div class="team-name">${s.name}</div>
+                    </div>
+                    <p class="muted" style="margin-bottom: 1rem;">${s.description}</p>
+                    <div class="member-list">
+                        ${memberList || '<div class="muted">メンバーなし</div>'}
+                    </div>
+                `;
+                setsBox.appendChild(card);
+            });
+
+            content.appendChild(wrap);
+            content.appendChild(setsBox);
+        }
+
+        // 初期表示
+        try {
+            if (RAW) {
+                const data = JSON.parse(RAW);
+                render(data);
+            } else {
+                empty.style.display = 'block';
+            }
+        } catch (e) {
+            empty.style.display = 'block';
+        }
+
+        // クリア
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('api_result');
+            content.innerHTML = '';
+            empty.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

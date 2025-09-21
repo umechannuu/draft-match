@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ドラフトマッチ</title>
+
+    <script>
+        window.__API_ENDPOINT__ = "https://mk5x1z782h.execute-api.ap-northeast-1.amazonaws.com/test";
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --card-hover: #f1f5f9;
+            --muted: #64748b;
+            --text: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --ok: #059669;
+            --warn: #d97706;
+            --err: #dc2626;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --input-bg: #ffffff;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--muted);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem 3rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .form-section {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+        }
+
+        .card-description {
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-grid-2 {
+            grid-template-columns: 1fr 1fr;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .label-required::after {
+            content: " *";
+            color: var(--err);
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        select, 
+        textarea {
+            width: 100%;
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input[type="number"]:read-only {
+            background-color: var(--card-hover);
+            color: var(--muted);
+            cursor: default;
+        }
+
+        .spinner-only {
+            background-color: var(--card-hover);
+            cursor: default;
+        }
+
+        .spinner-only:focus {
+            background-color: var(--card-hover);
+        }
+
+        input[type="text"]:focus, 
+        input[type="number"]:focus, 
+        select:focus, 
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+        }
+
+        input[type="number"] {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: ui-monospace, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .number-input-container {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .number-input-container input {
+            border-radius: 0.5rem 0 0 0.5rem;
+            border-right: none;
+        }
+
+        .spinner-buttons {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            border-left: none;
+            border-radius: 0 0.5rem 0.5rem 0;
+            background: var(--input-bg);
+        }
+
+        .spinner-btn {
+            background: var(--border);
+            color: var(--text);
+            border: none;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            line-height: 1;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 1.5rem;
+        }
+
+        .spinner-btn:hover {
+            background: var(--border-hover);
+        }
+
+        .spinner-btn:first-child {
+            border-radius: 0 0.5rem 0 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .spinner-btn:last-child {
+            border-radius: 0 0 0.5rem 0;
+        }
+
+        fieldset {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 0;
+        }
+
+        fieldset legend {
+            color: var(--text);
+            font-weight: 500;
+            padding: 0 0.5rem;
+        }
+
+        .checkbox-grid {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--input-bg);
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--accent);
+            background: var(--card-hover);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + span {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.outline {
+            background: transparent;
+            color: var(--accent);
+        }
+
+        .btn.outline:hover:not(:disabled) {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn.ghost {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--muted);
+        }
+
+        .btn.ghost:hover:not(:disabled) {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .btn.success {
+            background: var(--ok);
+            border-color: var(--ok);
+        }
+
+        .btn.danger {
+            background: var(--err);
+            border-color: var(--err);
+        }
+
+        .status-message {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .status-success {
+            background: rgb(220 252 231);
+            color: var(--ok);
+            border: 1px solid rgb(187 247 208);
+        }
+
+        .status-error {
+            background: rgb(254 242 242);
+            color: var(--err);
+            border: 1px solid rgb(252 165 165);
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        .members-list {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .member-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 0.75rem;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--card-hover);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .pill {
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .add-member-btn {
+            margin-top: 1rem;
+        }
+
+        .json-preview {
+            background: var(--card-hover);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: ui-monospace, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 0 0.75rem 2rem;
+                margin: 1rem auto;
+                max-width: 100%;
+            }
+
+            .form-section {
+                max-width: 100%;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+            }
+
+            .form-grid-3 {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+            }
+
+            .member-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .checkbox-grid {
+                flex-direction: column;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0 0.75rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>ドラフトマッチ</h1>
+            <p class="subtitle">以下の希望条件を入力してください</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="form-section">
+            <!-- プロジェクト基本情報 -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">プロジェクト基本情報</h2>
+                    <p class="card-description">プロジェクトの基本的な情報を入力してください</p>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label class="label-required">プロジェクト名</label>
+                        <input id="name" type="text" placeholder="AI agent PoC" />
+                    </div>
+                    <div class="form-group">
+                        <label class="label-required">カテゴリ</label>
+                        <select id="category">
+                            <option value="新規開発" selected>新規開発</option>
+                            <option value="改善・保守">改善・保守</option>
+                            <option value="クライアント対応">クライアント対応</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-3">
+                    <div class="form-group">
+                        <label class="label-required">チーム人数</label>
+                        <input id="team_size" type="number" min="1" step="1" value="5" readonly style="background-color: var(--card-hover); color: var(--muted);" />
+                    </div>
+                    <div class="form-group">
+                        <label class="label-required">期間 (週)</label>
+                        <input id="duration_weeks" type="number" min="1" step="1" value="8" />
+                    </div>
+                    <div class="form-group">
+                        <label class="label-required">必要工数 (時間/週)</label>
+                        <input id="worktime" type="number" min="1" step="1" value="12" />
+                    </div>
+                </div>
+
+                <fieldset>
+                    <legend>プロジェクトタイプ（複数選択可）</legend>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="type" value="new" checked />
+                            <span>新規</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="type" value="reslect" />
+                            <span>再選択</span>
+                        </label>
+                    </div>
+                </fieldset>
+            </section>
+
+            <!-- リーダー情報 -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">リーダー設定</h2>
+                    <p class="card-description">プロジェクトのリーダーとサブリーダーを指定してください</p>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label>リーダー employee_id</label>
+                        <input id="leader" type="text" placeholder="E201" />
+                    </div>
+                    <div class="form-group">
+                        <label>サブリーダー employee_id</label>
+                        <input id="sub_leader" type="text" placeholder="E202" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- メンバー管理 -->
+            <section class="card" id="memberManagement" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title">メンバー管理</h2>
+                    <p class="card-description">既存のプロジェクトメンバーを追加してください</p>
+                </div>
+
+                <div class="members-list" id="members"></div>
+                <button class="btn ghost add-member-btn" type="button" id="addMember">
+                    メンバーを追加
+                </button>
+            </section>
+
+            <!-- 募集要件 -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">募集要件</h2>
+                    <p class="card-description">必要な役割と人数、スキルレベルを設定してください</p>
+                </div>
+
+                <fieldset>
+                    <legend>募集領域と人数（合計 ≤ チーム人数 − リーダー − サブリーダー）</legend>
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>Backend</label>
+                            <input id="rec_backend" type="number" min="0" step="1" value="1" class="spinner-only" />
+                        </div>
+                        <div class="form-group">
+                            <label>Frontend</label>
+                            <input id="rec_frontend" type="number" min="0" step="1" value="0" class="spinner-only" />
+                        </div>
+                        <div class="form-group">
+                            <label>ML/AI</label>
+                            <input id="rec_ml" type="number" min="0" step="1" value="1" class="spinner-only" />
+                        </div>
+                        <div class="form-group">
+                            <label>QA</label>
+                            <input id="rec_qa" type="number" min="0" step="1" value="1" class="spinner-only" />
+                        </div>
+                    </div>
+                    <div id="rec_error" class="status-message status-error" style="display: none;"></div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>希望熟練度（1〜10で設定、内部的に0.1〜1.0に変換）</legend>
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>Backend: 希望レベル / 考慮幅</label>
+                            <div class="form-grid form-grid-2">
+                                <input id="lvl_backend" type="number" min="1" max="10" step="1" value="9" class="spinner-only" />
+                                <input id="rng_backend" type="number" min="0" max="10" step="1" value="1" class="spinner-only" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Frontend: 希望レベル / 考慮幅</label>
+                            <div class="form-grid form-grid-2">
+                                <input id="lvl_frontend" type="number" min="1" max="10" step="1" value="7" class="spinner-only" />
+                                <input id="rng_frontend" type="number" min="0" max="10" step="1" value="1" class="spinner-only" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>ML/AI: 希望レベル / 考慮幅</label>
+                            <div class="form-grid form-grid-2">
+                                <input id="lvl_ml" type="number" min="1" max="10" step="1" value="5" class="spinner-only" />
+                                <input id="rng_ml" type="number" min="0" max="10" step="1" value="2" class="spinner-only" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>QA: 希望レベル / 考慮幅</label>
+                            <div class="form-grid form-grid-2">
+                                <input id="lvl_qa" type="number" min="1" max="10" step="1" value="3" class="spinner-only" />
+                                <input id="rng_qa" type="number" min="0" max="10" step="1" value="0" class="spinner-only" />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </section>
+
+            <!-- 実行ボタン -->
+            <section class="card">
+                <div class="form-grid">
+                    <button class="btn success" type="button" id="submitBtn" onclick="submitForm()">
+                        送信してチーム編成
+                    </button>
+                </div>
+                <div id="status"></div>
+            </section>
+        </div>
+
+        <!-- JSONプレビューとAPI管理 -->
+        <aside class="card" style="display: none;">
+            <div class="card-header">
+                <h2 class="card-title">API管理</h2>
+                <p class="card-description">保存済みデータの管理</p>
+            </div>
+
+            <div class="form-grid">
+                <button class="btn ghost" type="button" id="loadBtn">
+                    保存済みデータを取得（GET）
+                </button>
+            </div>
+
+            <div id="listArea"></div>
+            
+            <p class="muted">
+                ※ POST: API Gateway + Lambda、永続化: DynamoDB を想定
+            </p>
+        </aside>
+    </main>
+
+    <script>
+        // 数値入力のスピンボタン用関数
+        function incrementValue(inputId) {
+            const input = document.getElementById(inputId);
+            const currentValue = parseInt(input.value) || 0;
+            const max = parseInt(input.max) || 10;
+            if (currentValue < max) {
+                input.value = currentValue + 1;
+            }
+        }
+
+        function decrementValue(inputId) {
+            const input = document.getElementById(inputId);
+            const currentValue = parseInt(input.value) || 0;
+            const min = parseInt(input.min) || 0;
+            if (currentValue > min) {
+                input.value = currentValue - 1;
+            }
+        }
+
+        (function () {
+            const membersEl = document.getElementById('members');
+            const addBtn = document.getElementById('addMember');
+            // const previewEl = document.getElementById('preview'); // JSONプレビューは隠されているのでコメントアウト
+            const statusEl = document.getElementById('status');
+            const recErrorEl = document.getElementById('rec_error');
+
+            function getApiEndpoint() {
+                if (typeof window.__API_ENDPOINT__ === 'string' && window.__API_ENDPOINT__) return window.__API_ENDPOINT__;
+                const saved = localStorage.getItem('ai_agent_poc_api');
+                if (saved) return saved.trim();
+                const qs = new URLSearchParams(location.search);
+                if (qs.get('api')) return qs.get('api').trim();
+                return '';
+            }
+            let API_ENDPOINT = getApiEndpoint();
+
+            // --- メンバー行（role は固定4択のセレクト） ---
+            function addMemberRow(id = '', role = 'backend') {
+                const row = document.createElement('div');
+                row.className = 'member-row';
+                row.innerHTML = `
+                    <input type="text" placeholder="employee_id (例: E203)" value="${id}"/>
+                    <select>
+                        <option value="backend">Backend</option>
+                        <option value="frontend">Frontend</option>
+                        <option value="ml">ML/AI</option>
+                        <option value="qa">QA</option>
+                    </select>
+                    <button class="btn danger" type="button">削除</button>
+                `;
+                const sel = row.querySelector('select');
+                if (['backend', 'frontend', 'ml', 'qa'].includes(role)) sel.value = role;
+                row.querySelector('input').addEventListener('input', updatePreview);
+                sel.addEventListener('change', updatePreview);
+                row.querySelector('button').addEventListener('click', () => { 
+                    row.remove(); 
+                    updatePreview(); 
+                });
+                membersEl.appendChild(row);
+            }
+            
+            // 初期メンバー
+            addMemberRow('E203', 'ml');
+            addMemberRow('E204', 'frontend');
+            addMemberRow('E205', 'backend');
+            addBtn.addEventListener('click', () => addMemberRow());
+
+            function getCheckedValues(name) {
+                return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(x => x.value);
+            }
+
+            function int(id) { return Number(document.getElementById(id).value) || 0; }
+            function num1to10_to_0to1(v) { // 1〜10 → 0.1〜1.0
+                v = Math.max(0, Math.min(10, Number(v) || 0));
+                return Math.round((v / 10) * 100) / 100;
+            }
+
+            // 募集人数の合計チェック
+            function validateRecruitingTotals() {
+                const team = 5; // 固定値
+                const slots = team - 2; // リーダーとサブリーダーを除く
+
+                const total =
+                    int('rec_backend') + int('rec_frontend') + int('rec_ml') + int('rec_qa');
+
+                const submitBtn = document.getElementById('submitBtn');
+
+                if (total > slots) {
+                    recErrorEl.textContent = `募集合計(${total})が配置可能数(${slots})を超えています。これ以上追加できません。`;
+                    recErrorEl.style.display = 'block';
+                    submitBtn.disabled = true;
+                    return false;
+                } else {
+                    recErrorEl.style.display = 'none';
+                    submitBtn.disabled = false;
+                    return true;
+                }
+            }
+
+            // 送信ペイロードを組み立て
+            function buildPayload() {
+                // メンバー
+                const members = Array.from(document.querySelectorAll('.member-row')).map(r => {
+                    const idEl = r.querySelector('input');
+                    const roleEl = r.querySelector('select');
+                    return { employee_id: idEl.value.trim(), role: roleEl.value };
+                }).filter(m => m.employee_id && m.role);
+
+                // 募集人数
+                const recruiting_roles = {
+                    backend: int('rec_backend'),
+                    frontend: int('rec_frontend'),
+                    ml: int('rec_ml'),
+                    qa: int('rec_qa'),
+                };
+
+                // 熟練度（UIは1〜10、送信は0.1〜1.0）
+                const role_requirements = {
+                    backend: { level: num1to10_to_0to1(int('lvl_backend')), level_range: num1to10_to_0to1(int('rng_backend')) },
+                    ml: { level: num1to10_to_0to1(int('lvl_ml')), level_range: num1to10_to_0to1(int('rng_ml')) },
+                    qa: { level: num1to10_to_0to1(int('lvl_qa')), level_range: num1to10_to_0to1(int('rng_qa')) },
+                };
+
+                // カテゴリ（単一）
+                const category = document.getElementById('category').value;
+
+                return {
+                    name: document.getElementById('name').value.trim() || 'AI agent PoC',
+                    type: getCheckedValues('type'),                // ["new","reslect"] など
+                    "チーム人数": int('team_size'),
+                    category,
+                    duration_weeks: int('duration_weeks'),
+                    worktime: int('worktime'),
+                    leader: document.getElementById('leader').value.trim(),
+                    sub_leader: document.getElementById('sub_leader').value.trim(),
+                    member: members,
+                    recruiting_roles,
+                    role_requirements,
+                    return_sets: true
+                };
+            }
+
+            // プロジェクトタイプの変更を監視してメンバー管理の表示制御
+            function updateMemberManagementVisibility() {
+                const newCheckbox = document.querySelector('input[name="type"][value="new"]');
+                const reselectCheckbox = document.querySelector('input[name="type"][value="reslect"]');
+                const memberManagement = document.getElementById('memberManagement');
+                
+                if (memberManagement) {
+                    // 再選択が選択されている場合のみメンバー管理を表示
+                    if (reselectCheckbox && reselectCheckbox.checked) {
+                        memberManagement.style.display = 'block';
+                    } else {
+                        memberManagement.style.display = 'none';
+                    }
+                }
+            }
+            
+            // プロジェクトタイプのチェックボックスにイベントリスナーを追加（排他制御）
+            document.querySelectorAll('input[name="type"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // 他のチェックボックスのチェックを外す
+                        document.querySelectorAll('input[name="type"]').forEach(otherCheckbox => {
+                            if (otherCheckbox !== this) {
+                                otherCheckbox.checked = false;
+                            }
+                        });
+                    }
+                    updateMemberManagementVisibility();
+                });
+            });
+            
+            // 初期状態を設定
+            updateMemberManagementVisibility();
+
+            // spinner-only クラスの要素に対してキーボード入力を無効化
+            document.querySelectorAll('.spinner-only').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    // 矢印キー、Tab、Backspace、Delete、Enterのみ許可
+                    const allowedKeys = [
+                        'ArrowUp', 'ArrowDown', 'Tab', 'Backspace', 'Delete', 'Enter'
+                    ];
+                    if (!allowedKeys.includes(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+                
+                input.addEventListener('input', function(e) {
+                    // 直接入力を防ぐため、値の変更を監視してスピナー以外の変更を無効化
+                    const currentValue = this.value;
+                    setTimeout(() => {
+                        // 値が数値以外になった場合は元に戻す
+                        if (isNaN(this.value) || this.value === '') {
+                            this.value = currentValue;
+                        }
+                    }, 0);
+                });
+            });
+
+            function updatePreview() {
+                validateRecruitingTotals();
+                const previewEl = document.getElementById('preview');
+                if (previewEl) {
+                    previewEl.value = JSON.stringify(buildPayload(), null, 2);
+                }
+            }
+            // 入力の都度プレビュー更新
+            document.querySelectorAll('input,select,textarea').forEach(el => {
+                el.addEventListener('input', updatePreview);
+                el.addEventListener('change', updatePreview);
+            });
+            
+            // 募集人数フィールドに特別なリスナーを追加
+            ['rec_backend', 'rec_frontend', 'rec_ml', 'rec_qa'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.addEventListener('input', validateRecruitingTotals);
+                field.addEventListener('change', validateRecruitingTotals);
+            });
+            
+            updatePreview();
+
+            const previewBtn = document.getElementById('previewBtn');
+            if (previewBtn) {
+                previewBtn.addEventListener('click', updatePreview);
+            }
+
+            // --- 送信 ---
+            window.submitForm = async function submitForm() {
+                console.log('submitForm function called'); // デバッグ用
+                const statusEl = document.getElementById('status');
+                const btn = document.getElementById('submitBtn');
+
+                // 既存のバリデーション・エンドポイント取得などはそのまま
+                function getApiEndpoint() {
+                    if (typeof window.__API_ENDPOINT__ === 'string' && window.__API_ENDPOINT__) return window.__API_ENDPOINT__;
+                    const saved = localStorage.getItem('ai_agent_poc_api');
+                    if (saved) return saved.trim();
+                    const qs = new URLSearchParams(location.search);
+                    if (qs.get('api')) return qs.get('api').trim();
+                    return '';
+                }
+                const API_ENDPOINT = getApiEndpoint();
+                console.log('API_ENDPOINT:', API_ENDPOINT); // デバッグ用
+
+                if (!API_ENDPOINT) { 
+                    statusEl.innerHTML = '<div class="status-message status-error">APIエンドポイントが未設定です。</div>'; 
+                    return; 
+                }
+
+                // 募集合計チェック
+                console.log('Validating recruiting totals...'); // デバッグ用
+                if (typeof validateRecruitingTotals === 'function' && !validateRecruitingTotals()) {
+                    console.log('Validation failed'); // デバッグ用
+                    statusEl.innerHTML = '<div class="status-message status-error">入力エラーを修正してください。</div>';
+                    return;
+                }
+                console.log('Validation passed'); // デバッグ用
+
+                try {
+                    btn.disabled = true;
+                    btn.textContent = '送信中...';
+                    statusEl.innerHTML = '<div class="status-message">送信中...</div>';
+                    console.log('Starting API call...'); // デバッグ用
+
+                    // 送信ペイロード（あなたの buildPayload を利用）
+                    const payload = (typeof buildPayload === 'function') ? buildPayload() : {};
+                    console.log('Payload:', payload); // デバッグ用
+                    const res = await fetch(API_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        statusEl.innerHTML = '<div class="status-message status-error">エラー: ' + (data.message || res.status) + '</div>';
+                        return;
+                    }
+
+                    // 応答を保存（result.html 側で取得して描画）
+                    sessionStorage.setItem('api_result', JSON.stringify(data));
+                    statusEl.innerHTML = '<div class="status-message status-success">送信完了！結果ページに移動します...</div>';
+                    
+                    // 画面遷移
+                    setTimeout(() => {
+                        window.location.href = 'result.html';
+                    }, 1000);
+                } catch (e) {
+                    statusEl.innerHTML = '<div class="status-message status-error">通信エラー: ' + e.message + '</div>';
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '送信してチーム編成';
+                    // バリデーションを再実行してボタン状態を更新
+                    validateRecruitingTotals();
+                }
+            };
+            // --- GETで保存済み取得（任意） ---
+            document.getElementById('loadBtn').addEventListener('click', async () => {
+                if (!API_ENDPOINT) {
+                    statusEl.innerHTML = '<div class="status-message status-error">APIエンドポイントが未設定です。</div>';
+                    return;
+                }
+                localStorage.setItem('ai_agent_poc_api', API_ENDPOINT);
+                try {
+                    statusEl.innerHTML = '<div class="status-message">取得中...</div>';
+                    const res = await fetch(API_ENDPOINT, { method: 'GET' });
+                    const data = await res.json();
+                    if (res.ok) {
+                        statusEl.innerHTML = '<div class="status-message status-success">取得しました。</div>';
+                        const listArea = document.getElementById('listArea');
+                        listArea.innerHTML = '';
+                        if (!Array.isArray(data) || data.length === 0) {
+                            listArea.innerHTML = '<div class="muted" style="margin-top: 1rem;">データはまだありません。</div>';
+                            return;
+                        }
+                        const listContainer = document.createElement('div');
+                        listContainer.style.marginTop = '1rem';
+                        for (const item of data) {
+                            const div = document.createElement('div');
+                            div.style.marginBottom = '0.5rem';
+                            div.innerHTML = `
+                                <span class="pill">${item.project_id || 'idなし'}</span> 
+                                <span style="margin-left: 0.5rem; color: var(--muted);">${item.name || ''}</span>
+                            `;
+                            listContainer.appendChild(div);
+                        }
+                        listArea.appendChild(listContainer);
+                    } else {
+                        statusEl.innerHTML = '<div class="status-message status-error">エラー: ' + (data.message || res.status) + '</div>';
+                    }
+                } catch (e) {
+                    statusEl.innerHTML = '<div class="status-message status-error">通信エラー: ' + e.message + '</div>';
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
